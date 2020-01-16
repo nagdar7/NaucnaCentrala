@@ -1,4 +1,4 @@
-package root.demo.controller;
+package naucnaCentrala.NaucnaCentrala.controller;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,9 +25,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import root.demo.model.FormFieldsDto;
-import root.demo.model.FormSubmissionDto;
-import root.demo.model.TaskDto;
+import naucnaCentrala.NaucnaCentrala.model.FormFieldsDto;
+import naucnaCentrala.NaucnaCentrala.model.FormSubmissionDto;
+import naucnaCentrala.NaucnaCentrala.model.TaskDto;
 
 @Controller
 @RequestMapping("/welcome")

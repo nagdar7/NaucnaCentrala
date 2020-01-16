@@ -1,4 +1,4 @@
-package root.demo.handlers;
+package naucnaCentrala.NaucnaCentrala.handlers;
 
 import java.util.List;
 

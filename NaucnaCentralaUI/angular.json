@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "EBookFE": {
+    "NaucnaCentrala": {
       "root": "",
       "sourceRoot": "src",
       "projectType": "application",
@@ -13,7 +13,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/EBookFE",
+            "outputPath": "dist/NaucnaCentrala",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
@@ -50,18 +50,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "EBookFE:build"
+            "browserTarget": "NaucnaCentrala:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "EBookFE:build:production"
+              "browserTarget": "NaucnaCentrala:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "EBookFE:build"
+            "browserTarget": "NaucnaCentrala:build"
           }
         },
         "test": {
@@ -95,7 +95,7 @@
         }
       }
     },
-    "EBookFE-e2e": {
+    "NaucnaCentrala-e2e": {
       "root": "e2e/",
       "projectType": "application",
       "architect": {
@@ -103,7 +103,7 @@
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {
             "protractorConfig": "e2e/protractor.conf.js",
-            "devServerTarget": "EBookFE:serve"
+            "devServerTarget": "NaucnaCentrala:serve"
           }
         },
         "lint": {
@@ -118,5 +118,5 @@
       }
     }
   },
-  "defaultProject": "EBookFE"
+  "defaultProject": "NaucnaCentrala"
 }

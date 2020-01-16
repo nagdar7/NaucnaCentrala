@@ -1,4 +1,4 @@
-package root.demo;
+package naucnaCentrala.NaucnaCentrala;
 
 import org.camunda.bpm.engine.RuntimeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,10 +16,10 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @Configuration
 @EnableWebMvc
 @SpringBootApplication
-public class DemoApplication {
+public class NaucnaCentralaApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(DemoApplication.class, args);
+		SpringApplication.run(NaucnaCentralaApplication.class, args);
 	}
 	
 	@Bean

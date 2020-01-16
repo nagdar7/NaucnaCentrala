@@ -1,4 +1,4 @@
-package root.demo.services;
+package naucnaCentrala.NaucnaCentrala.services;
 
 import java.util.List;
 
@@ -10,7 +10,7 @@ import org.camunda.bpm.engine.identity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import root.demo.model.FormSubmissionDto;
+import naucnaCentrala.NaucnaCentrala.model.FormSubmissionDto;
 
 @Service
 public class TestService implements JavaDelegate{

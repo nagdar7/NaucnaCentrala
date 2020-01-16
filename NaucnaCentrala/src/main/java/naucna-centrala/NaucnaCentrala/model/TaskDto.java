@@ -1,4 +1,4 @@
-package root.demo.model;
+package naucnaCentrala.NaucnaCentrala.model;
 
 public class TaskDto {
 	
