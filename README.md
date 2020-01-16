@@ -1,0 +1,1 @@
+# Naucna Centrala - projekat za predmet UPP 2019/2020
