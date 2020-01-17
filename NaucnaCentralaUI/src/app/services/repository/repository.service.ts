@@ -6,6 +6,8 @@ import { Http, Response } from '@angular/http';
 
 import { Observable } from 'rxjs';
 
+import { HOST_URL } from '../../../config'
+
 @Injectable({
   providedIn: 'root'
 })
@@ -22,20 +24,20 @@ export class RepositoryService {
 
 
   startProcess(){
-    return this.httpClient.get('http://localhost:8080/welcome/get') as Observable<any>
+    return this.httpClient.get(HOST_URL+'/welcome/get') as Observable<any>
   }
 
   getTasks(processInstance : string){
 
-    return this.httpClient.get('http://localhost:8080/welcome/get/tasks/'.concat(processInstance)) as Observable<any>
+    return this.httpClient.get(HOST_URL+'/welcome/get/tasks/'.concat(processInstance)) as Observable<any>
   }
 
   claimTask(taskId){
-    return this.httpClient.post('http://localhost:8080/welcome/tasks/claim/'.concat(taskId), null) as Observable<any>
+    return this.httpClient.post(HOST_URL+'/welcome/tasks/claim/'.concat(taskId), null) as Observable<any>
   }
 
   completeTask(taskId){
-    return this.httpClient.post('http://localhost:8080/welcome/tasks/complete/'.concat(taskId), null) as Observable<any>
+    return this.httpClient.post(HOST_URL+'/welcome/tasks/complete/'.concat(taskId), null) as Observable<any>
   }
 
 }

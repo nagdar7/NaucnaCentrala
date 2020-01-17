@@ -1,6 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { FormsModule }   from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { RouterModule, Routes } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
 import { HttpModule } from '@angular/http';
@@ -12,22 +12,22 @@ import { UserService } from './services/users/user.service';
 
 import { RegistrationComponent } from './registration/registration.component';
 
-import {Authorized} from './guard/authorized.guard';
-import {Admin} from './guard/admin.guard';
-import {Notauthorized} from './guard/notauthorized.guard';
+import { Authorized } from './guard/authorized.guard';
+import { Admin } from './guard/admin.guard';
+import { Notauthorized } from './guard/notauthorized.guard';
 
 const ChildRoutes =
   [
   ]
 
-  const RepositoryChildRoutes =
+const RepositoryChildRoutes =
   [
-    
+
   ]
 
 const Routes = [
   {
-    path: "registrate",
+    path: "register",
     component: RegistrationComponent,
     canActivate: [Notauthorized]
   }
@@ -42,15 +42,15 @@ const Routes = [
     BrowserModule,
     FormsModule,
     RouterModule.forRoot(Routes),
-    HttpClientModule, 
+    HttpClientModule,
     HttpModule
   ],
-  
-  providers:  [
+
+  providers: [
     Admin,
     Authorized,
     Notauthorized
-    ],
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

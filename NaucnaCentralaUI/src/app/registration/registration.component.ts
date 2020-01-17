@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import {UserService} from '../services/users/user.service';
-import {RepositoryService} from '../services/repository/repository.service';
+import { UserService } from '../services/users/user.service';
+import { RepositoryService } from '../services/repository/repository.service';
+import { RegistrationService } from '../services/registration/registration.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-registration',
@@ -18,9 +20,11 @@ export class RegistrationComponent implements OnInit {
   private enumValues = [];
   private tasks = [];
 
-  constructor(private userService : UserService, private repositoryService : RepositoryService) {
-    
-    let x = repositoryService.startProcess();
+  constructor(
+    private registrationService: RegistrationService,
+    private router: Router) {
+
+    let x = registrationService.startProcess();
 
     x.subscribe(
       res => {
@@ -29,9 +33,9 @@ export class RegistrationComponent implements OnInit {
         this.formFieldsDto = res;
         this.formFields = res.formFields;
         this.processInstance = res.processInstanceId;
-        this.formFields.forEach( (field) =>{
-          
-          if( field.type.name=='enum'){
+        this.formFields.forEach((field) => {
+
+          if (field.type.name == 'enum') {
             this.enumValues = Object.keys(field.type.values);
           }
         });
@@ -40,27 +44,29 @@ export class RegistrationComponent implements OnInit {
         console.log("Error occured");
       }
     );
-   }
+  }
 
   ngOnInit() {
   }
 
-  onSubmit(value, form){
+  onSubmit(value, form) {
     let o = new Array();
     for (var property in value) {
       console.log(property);
       console.log(value[property]);
-      o.push({fieldId : property, fieldValue : value[property]});
+      o.push({ fieldId: property, fieldValue: value[property] });
     }
 
     console.log(o);
-    let x = this.userService.registerUser(o, this.formFieldsDto.taskId);
+    let x = this.registrationService.registerUser(o, this.formFieldsDto.taskId);
 
     x.subscribe(
       res => {
         console.log(res);
-        
-        alert("You registered successfully!")
+
+        alert("You registered successfully please check email!")
+
+        this.router.navigate(['/']);
       },
       err => {
         console.log("Error occured");
@@ -68,45 +74,45 @@ export class RegistrationComponent implements OnInit {
     );
   }
 
-  getTasks(){
-    let x = this.repositoryService.getTasks(this.processInstance);
+  // getTasks(){
+  //   let x = this.repositoryService.getTasks(this.processInstance);
 
-    x.subscribe(
-      res => {
-        console.log(res);
-        this.tasks = res;
-      },
-      err => {
-        console.log("Error occured");
-      }
-    );
-   }
+  //   x.subscribe(
+  //     res => {
+  //       console.log(res);
+  //       this.tasks = res;
+  //     },
+  //     err => {
+  //       console.log("Error occured");
+  //     }
+  //   );
+  //  }
 
-   claim(taskId){
-    let x = this.repositoryService.claimTask(taskId);
+  //  claim(taskId){
+  //   let x = this.repositoryService.claimTask(taskId);
 
-    x.subscribe(
-      res => {
-        console.log(res);
-      },
-      err => {
-        console.log("Error occured");
-      }
-    );
-   }
+  //   x.subscribe(
+  //     res => {
+  //       console.log(res);
+  //     },
+  //     err => {
+  //       console.log("Error occured");
+  //     }
+  //   );
+  //  }
 
-   complete(taskId){
-    let x = this.repositoryService.completeTask(taskId);
+  //  complete(taskId){
+  //   let x = this.repositoryService.completeTask(taskId);
 
-    x.subscribe(
-      res => {
-        console.log(res);
-        this.tasks = res;
-      },
-      err => {
-        console.log("Error occured");
-      }
-    );
-   }
+  //   x.subscribe(
+  //     res => {
+  //       console.log(res);
+  //       this.tasks = res;
+  //     },
+  //     err => {
+  //       console.log("Error occured");
+  //     }
+  //   );
+  //  }
 
 }
