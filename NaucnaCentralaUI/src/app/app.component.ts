@@ -1,3 +1,4 @@
+import { Editor } from "./guard/editor.guard";
 import { Router } from "@angular/router";
 import { Reviewer } from "./guard/reviewer.guard";
 import { Authorized } from "./guard/authorized.guard";
@@ -16,11 +17,15 @@ export class AppComponent {
     private userService: UserService,
     private authorized: Authorized,
     private reviewer: Reviewer,
+    private editor: Editor,
     private router: Router
   ) {}
 
   public isReviewer() {
     return this.reviewer.canActivate();
+  }
+  public isEditor() {
+    return this.editor.canActivate();
   }
 
   public loggedIn() {

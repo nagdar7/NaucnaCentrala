@@ -26,12 +26,32 @@ public class MagazineServiceImpl implements MagazineService {
     private MagazineRepository magazineRepository;
 
     @Autowired
+    private AccountRepository accountRepository;
+
+    @Autowired
     private AuthorityRepository authorityRepository;
 
     @Override
     public List<Magazine> findAll() {
         log.info("findAll");
-        return magazineRepository.findByActiveIsTrue();
+        return magazineRepository.findByActiveIsTrue().stream().map(x -> {
+            x.setOpenAccessAuthors(null);
+            return x;
+        }).collect(Collectors.toList());
     }
 
+    @Override
+    public Magazine getOne(Long id) {
+        log.info("getOne, id: {}", id);
+        return magazineRepository.findOneById(id);
+    }
+
+    @Override
+    public void payMembership(Long id, String username) {
+        log.info("payMembership, id: {}, user: {}", id, username);
+        Magazine magazine = magazineRepository.findOneById(id);
+        Account account = accountRepository.findByUsername(username);
+        magazine.getOpenAccessAuthors().add(account);
+        magazine = magazineRepository.save(magazine);
+    }
 }

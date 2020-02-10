@@ -32,10 +32,12 @@ import naucnaCentrala.NaucnaCentrala.model.FormSubmissionDto;
 import naucnaCentrala.NaucnaCentrala.model.LoginDTO;
 import naucnaCentrala.NaucnaCentrala.model.Magazine;
 import naucnaCentrala.NaucnaCentrala.model.TokenDTO;
+import naucnaCentrala.NaucnaCentrala.model.enumeration.BillingType;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "/api/v1/magazine")
@@ -74,11 +76,24 @@ public class MagazineController {
 
     Logger log = LoggerFactory.getLogger(this.getClass());
 
-    @GetMapping(path = "", produces = "application/json")
-    public @ResponseBody FormFieldsDto startProcess() {
-        log.info("start create new magazine process and get form fields");
+    @GetMapping(path = "/{processName}", produces = "application/json")
+    public @ResponseBody FormFieldsDto startProcess(@PathVariable String processName) {
+        log.info("start create new magazine process and get form fields, process: {}", processName);
         // start process
-        ProcessInstance pi = runtimeService.startProcessInstanceByKey("proces_kreiranja_casopisa");
+        ProcessInstance pi = null;
+        switch (processName) {
+        case "create-new":
+            pi = runtimeService.startProcessInstanceByKey("proces_kreiranja_casopisa");
+            runtimeService.setVariable(pi.getId(), "urednik", Utils.getCurrentUserLogin().get());
+            break;
+        case "publish-paper":
+            pi = runtimeService.startProcessInstanceByKey("proces_obrade_podnetog_teksta");
+            runtimeService.setVariable(pi.getId(), "autor", Utils.getCurrentUserLogin().get());
+            break;
+        default:
+            throw new Error("non existing process!");
+        }
+
         // get first task
         Task task = taskService.createTaskQuery().processInstanceId(pi.getId()).list().get(0);
         // taskService.addCandidateUser(task.getId(),
@@ -115,11 +130,11 @@ public class MagazineController {
 
         Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
         if (task == null) {
-            return null; // new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            throw new Exception("task not found");
         }
         String processInstanceId = task.getProcessInstanceId();
         if (processInstanceId == null) {
-            return null; // new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            throw new Exception("process not found");
         }
         runtimeService.setVariable(processInstanceId, "create_new_magazine", dto);
         formService.submitTaskForm(taskId, map);
@@ -139,14 +154,129 @@ public class MagazineController {
             @PathVariable String taskId) throws Exception {
         log.info("asign roles to magazine, dto: {}", dto);
         HashMap<String, Object> map = Utils.mapListToDto(dto);
+        map.remove("urednici");
+        // List<String> urednici = Arrays.asList(((String)
+        // map.get("urednici")).split(","));
+        List<String> recezenti = Arrays.asList(((String) map.get("recezenti")).split(","));
+        if (recezenti.size() <= 1) {
+            throw new Exception("Invalid value submitted for form field 'recezenti': minlength set to '2'");
+        }
+        map.remove("recezenti");
+
+        Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
+        if (task == null) {
+            throw new Exception("task not found");
+        }
+        String processInstanceId = task.getProcessInstanceId();
+        if (processInstanceId == null) {
+            throw new Exception("process not found");
+        }
+        runtimeService.setVariable(processInstanceId, "asign_roles_to_magazine", dto);
+        formService.submitTaskForm(taskId, map);
+
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @GetMapping(path = "", produces = "application/json")
+    public @ResponseBody ResponseEntity getAllMagazines() {
+        log.info("request to get all magazines");
+        List<Magazine> magazines = magazineService.findAll();
+        return new ResponseEntity(magazines, HttpStatus.OK);
+    }
+
+    @PostMapping(path = "/{magazineId}/select/{taskId}", produces = "application/json")
+    public @ResponseBody FormFieldsDto selectMagazineToPublish(@PathVariable Long magazineId,
+            @PathVariable String taskId) throws Exception {
+        log.info("selectMagazineToPublish, magazineId: {}, taskId: {}", magazineId, taskId);
+
+        Magazine magazine = magazineService.getOne(magazineId);
+        if (magazine == null) {
+            throw new Exception("magazine not found");
+        }
+
+        HashMap<String, Object> map = new HashMap<String, Object>();
+        if (magazine.getBillingType().equals(BillingType.AUTHORS)) {
+            map.put("casopis", "open_access");
+        } else {
+            map.put("casopis", "not_open_access");
+        }
+
+        Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
+        if (task == null) {
+            throw new Exception("task not found");
+        }
+        String processInstanceId = task.getProcessInstanceId();
+        if (processInstanceId == null) {
+            throw new Exception("process not found");
+        }
+        runtimeService.setVariable(processInstanceId, "casopis", map.get("casopis"));
+        runtimeService.setVariable(processInstanceId, "casopis_recezenti", magazine.getReviewers());
+
+        // task.getExecution().setVariable("casopis_glavni_urednik", "urednik")
+        // task.getExecution().setVariable("casopis_urednik_naucne_oblasti", "urednik")
+
+        // recezenti =
+        // task.getExecution().getProcessEngineServices().getIdentityService().createUserQuery().memberOfGroup("recezent").list()
+
+        // task.getExecution().setVariable("casopis_recezenti", recezenti)
+
+        runtimeService.setVariable(processInstanceId, "magazine_id", magazineId);
+
+        formService.submitTaskForm(taskId, map);
+
+        // get next task
+        task = taskService.createTaskQuery().processInstanceId(processInstanceId).list().get(0);
+
+        // get task form
+        TaskFormData tfd = formService.getTaskFormData(task.getId());
+        List<FormField> properties = tfd.getFormFields();
+
+        return new FormFieldsDto(task.getId(), processInstanceId, properties);
+    }
+
+    @PostMapping(path = "/{magazineId}/pay-membership/{taskId}", produces = "application/json")
+    public @ResponseBody FormFieldsDto payMembership(@PathVariable Long magazineId, @PathVariable String taskId)
+            throws Exception {
+        String login = Utils.getCurrentUserLogin().get();
+        log.info("payMembership, user: {}, magazineId: {}", login, magazineId);
+        HashMap<String, Object> map = new HashMap<String, Object>();
+        map.put("uplati_clanarinu", true);
+
+        Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
+        if (task == null) {
+            throw new Exception("task not found");
+        }
+        String processInstanceId = task.getProcessInstanceId();
+        if (processInstanceId == null) {
+            throw new Exception("process not found");
+        }
+        formService.submitTaskForm(taskId, map);
+
+        magazineService.payMembership(magazineId, login);
+
+        // get next task
+        task = taskService.createTaskQuery().processInstanceId(processInstanceId).list().get(0);
+
+        // get task form
+        TaskFormData tfd = formService.getTaskFormData(task.getId());
+        List<FormField> properties = tfd.getFormFields();
+
+        return new FormFieldsDto(task.getId(), processInstanceId, properties);
+    }
+
+    @PostMapping(path = "/{magazineId}/submit-paper/{taskId}", produces = "application/json")
+    public @ResponseBody ResponseEntity submitPaper(@RequestBody List<FormSubmissionDto> dto,
+            @PathVariable String magazineId, @PathVariable String taskId) throws Exception {
+        log.info("createNew magazine, dto: {}, magazineId: {}", dto, magazineId);
+        HashMap<String, Object> map = Utils.mapListToDto(dto);
 
         // List<String> naucneOblasti = Arrays.asList(((String)
         // map.get("naucne_oblasti")).split(","));
-        // if (naucneOblasti.size() <= 1) {
+        // if (naucneOblasti.size() <= 0) {
         // throw new Exception("Invalid value submitted for form field 'naucne_oblasti':
         // minlength set to '1'");
         // }
-        // map.remove("naucne_oblasti");
+        map.remove("naucna_oblast");
 
         // list all running/unsuspended instances of the process
         // ProcessInstance processInstance =
@@ -160,32 +290,16 @@ public class MagazineController {
 
         Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
         if (task == null) {
-            return null; // new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            throw new Exception("task not found");
         }
         String processInstanceId = task.getProcessInstanceId();
         if (processInstanceId == null) {
-            return null; // new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            throw new Exception("process not found");
         }
-        runtimeService.setVariable(processInstanceId, "asign_roles_to_magazine", dto);
+        runtimeService.setVariable(processInstanceId, "submitted_paper", dto);
         formService.submitTaskForm(taskId, map);
 
         return new ResponseEntity(HttpStatus.OK);
-        // get next task
-        // task =
-        // taskService.createTaskQuery().processInstanceId(processInstanceId).list().get(0);
-
-        // // get task form
-        // TaskFormData tfd = formService.getTaskFormData(task.getId());
-        // List<FormField> properties = tfd.getFormFields();
-
-        // return new FormFieldsDto(task.getId(), processInstanceId, properties);
-    }
-
-    @GetMapping(path = "/all", produces = "application/json")
-    public @ResponseBody ResponseEntity getAllMagazines() {
-        log.info("request to get all magazines");
-        List<Magazine> magazines = magazineService.findAll();
-        return new ResponseEntity(magazines, HttpStatus.OK);
     }
 
     // @PostMapping(path = "/login/{taskId}", produces = "application/json")

@@ -1,23 +1,10 @@
 <div>
-    <a
-        *ngIf="isReviewer()"
-        class="navbar-brand"
-        [routerLink]="['/magazine/new']"
+    <form
+        #f="ngForm"
+        (ngSubmit)="onSubmit(f.value, f)"
+        ngNativeValidate
     >
-        Create new Magazine
-    </a>
-    <a
-        style="float: right;"
-        *ngIf="isAuthor() && !selectMagazineForPaper"
-        class="navbar-brand"
-        (click)="submitWorkToMagazine()"
-        [routerLink]
-    >
-        Submit work to magazine
-    </a>
-    <hr>
-
-    <!-- <div *ngFor="let field of formFields">
+        <div *ngFor="let field of formFields">
             <label for="{{ field.id }}">{{ field.label }}</label>
 
             <input
@@ -28,8 +15,10 @@
             >
             <input
                 type="text"
+                [readonly]="isReadonly(field)"
+                style="width: 100%;"
                 name="{{ field.id }}"
-                ngModel
+                ngModel="{{field.defaultValue}}"
                 *ngIf="field.type.name == 'string' && field.id != 'password'"
             >
             <input
@@ -40,15 +29,16 @@
             >
             <input
                 type="number"
+                [readonly]="isReadonly(field)"
                 name="{{ field.id }}"
                 ngModel
                 *ngIf="field.type.name == 'long'"
             >
             <select
-                multiple
+                [multiple]="['naucne_oblasti', 'urednici', 'recezenti'].indexOf(field.id) >=0"
                 ngModel
                 name="{{ field.id }}"
-                *ngIf="field.type.name == 'enum' && field.id == 'naucne_oblasti'"
+                *ngIf="field.type.name == 'enum'"
             >
                 <option
                     *ngFor="let val of enumValues[field.id]"
@@ -58,7 +48,7 @@
                 </option>
             </select>
 
-            <select
+            <!-- <select
                 ngModel
                 name="{{ field.id }}"
                 *ngIf="field.type.name == 'enum' && field.id != 'naucne_oblasti'"
@@ -69,39 +59,27 @@
                 >
                     {{ field.type.values[val] }}
                 </option>
-            </select>
+            </select> -->
+
+            <input
+                type="date"
+                [readonly]="isReadonly(field)"
+                name="{{ field.id }}"
+                ngModel
+                *ngIf="field.type.name == 'date'"
+            >
         </div>
 
         <input
             type="submit"
             value="Submit"
-        > -->
+        >
+    </form>
 
     <!-- <button (click)="getTasks()">Get tasks</button> -->
-    <div style="overflow-x:auto;">
-        <table>
-            <thead>
-                <th>Id</th>
-                <th>Title</th>
-                <th>ISSN</th>
-                <th>Billing type</th>
-                <th>Science fields</th>
-            </thead>
-            <tbody>
-                <tr *ngFor="let magazine of allMagazines">
-                    <td>{{magazine.id}}</td>
-                    <td>{{magazine.title}}</td>
-                    <td>{{magazine.issn}}</td>
-                    <td>{{magazine.billingType}}</td>
-                    <td>
-                        {{magazine.scienceFieldList.join(", ")}}
-                    </td>
-                    <td *ngIf="isAuthor() && selectMagazineForPaper">
-                        <button (click)="publishPaper(magazine.id)">Publish paper</button>
-                    </td>
-                </tr>
 
-            </tbody>
-        </table>
-    </div>
+    <!-- <table>
+    <tr *ngFor="let task of tasks" > <td>{{task.name}}</td><td>{{task.assignee}}</td><td><button (click)="claim(task.taskId)">Claim</button></td> <td><button (click)="complete(task.taskId)">Complete</button></td></tr>
+  
+  </table> -->
 </div>

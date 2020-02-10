@@ -13,16 +13,14 @@ import { map } from "rxjs/operators";
   providedIn: "root"
 })
 export class MagazineService {
-  categories = [];
-  languages = [];
-  books = [];
+  taskId: string;
 
   constructor(private httpClient: HttpClient, private http: Http) {}
 
-  startProcess() {
-    return this.httpClient.get(HOST_URL + "/api/v1/magazine") as Observable<
-      any
-    >;
+  startProcess(process) {
+    return this.httpClient.get(
+      HOST_URL + "/api/v1/magazine/".concat(process)
+    ) as Observable<any>;
   }
 
   createNewMagazine(magazine, taskId) {
@@ -40,9 +38,30 @@ export class MagazineService {
   }
 
   findAll() {
-    return this.httpClient.get(HOST_URL + "/api/v1/magazine/all") as Observable<
+    return this.httpClient.get(HOST_URL + "/api/v1/magazine") as Observable<
       any
     >;
+  }
+
+  selectMagazineForSubmitPaper(magazineId, taskId) {
+    return this.httpClient.post(
+      `${HOST_URL}/api/v1/magazine/${magazineId}/select/${taskId}`,
+      null
+    ) as Observable<any>;
+  }
+
+  payMembership(magazineId, taskId) {
+    return this.httpClient.post(
+      `${HOST_URL}/api/v1/magazine/${magazineId}/pay-membership/${taskId}`,
+      null
+    ) as Observable<any>;
+  }
+
+  submitPaper(magazineId, paper, taskId) {
+    return this.httpClient.post(
+      `${HOST_URL}/api/v1/magazine/${magazineId}/submit-paper/${taskId}`,
+      paper
+    ) as Observable<any>;
   }
 
   // loginUser(user, taskId) {

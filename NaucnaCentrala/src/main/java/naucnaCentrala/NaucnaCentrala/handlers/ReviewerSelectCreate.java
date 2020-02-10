@@ -14,39 +14,48 @@ import org.camunda.bpm.engine.form.FormType;
 import org.camunda.bpm.engine.form.TaskFormData;
 import org.camunda.bpm.engine.identity.User;
 import org.camunda.bpm.engine.impl.form.type.EnumFormType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import naucnaCentrala.NaucnaCentrala.model.Account;
 import naucnaCentrala.NaucnaCentrala.model.enumeration.ScienceField;
+import naucnaCentrala.NaucnaCentrala.service.AccountService;
 
 @Service
-public class LoadScienceFields implements TaskListener {
+public class ReviewerSelectCreate implements TaskListener {
 	@Autowired
 	IdentityService identityService;
+	@Autowired
+	AccountService accountService;
+
+	Logger log = LoggerFactory.getLogger(this.getClass());
 
 	@Override
 	public void notify(DelegateTask task) {
-		System.out.println("LoadScienceFields");
+		log.info("notify");
 		TaskFormData taskFormData = task.getExecution().getProcessEngineServices().getFormService()
 				.getTaskFormData(task.getId());
+
+		List<Account> accountants = (List<Account>) task.getExecution().getVariable("casopis_recezenti");
+
 		List<FormField> formFields = taskFormData.getFormFields();
 		if (formFields != null) {
-			System.out.println("formFields != null");
 			for (FormField field : formFields) {
-				if (field != null
-						&& ("naucne_oblasti".equals(field.getId()) || "naucna_oblast".equals(field.getId()))) {
-					System.out.println("field != null && \"naucne_oblasti\".equals(field.getId())");
+				if (field != null && "recezent".equals(field.getId())) {
+					// ovo je nase select polje
 					FormType formType = field.getType();
 					if (formType != null) {
-						System.out.println("formType != null");
+						log.info("formType != null");
 						Map<String, String> values = (LinkedHashMap<String, String>) formType.getInformation("values");
 						if (values == null) {
-							System.out.println("values == null");
+							log.info("values == null");
 							values = new LinkedHashMap<String, String>();
 						}
-						System.out.println("values != null");
-						for (ScienceField scienceField : ScienceField.values()) {
-							values.put(scienceField.name(), scienceField.name());
+						log.info("values != null");
+						for (Account account : accountants) {
+							values.put(account.getUsername(), account.getFirstName() + " " + account.getLastName());
 						}
 					}
 				}

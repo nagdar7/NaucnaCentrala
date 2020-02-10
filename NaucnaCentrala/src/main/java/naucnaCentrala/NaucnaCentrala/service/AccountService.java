@@ -1,5 +1,7 @@
 package naucnaCentrala.NaucnaCentrala.service;
 
+import java.util.List;
+
 import naucnaCentrala.NaucnaCentrala.model.Account;
 
 public interface AccountService {
@@ -9,4 +11,8 @@ public interface AccountService {
     Account findByUsername(String username);
 
     Account findById(Long id);
+
+    List<Account> getAllReviewers();
+
+    List<Account> getAllEditors();
 }

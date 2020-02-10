@@ -31,6 +31,14 @@
     <a
         *ngIf="loggedIn()"
         class="navbar-brand"
+        [routerLink]="['/task']"
+    >
+        Tasks
+    </a>
+
+    <a
+        *ngIf="loggedIn()"
+        class="navbar-brand"
         (click)="logout()"
     >
         Logout

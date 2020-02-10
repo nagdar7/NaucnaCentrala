@@ -62,18 +62,38 @@ public class CreateNewMagazineService implements JavaDelegate {
 		List<FormSubmissionDto> newMagazineFormSubmission = (List<FormSubmissionDto>) execution
 				.getVariable("create_new_magazine");
 		HashMap<String, Object> newMagazineMap = Utils.mapListToDto(newMagazineFormSubmission);
-
-		// List<FormSubmissionDto> rolesToMagazineFormSubmission =
-		// (List<FormSubmissionDto>) execution
-		// .getVariable("asign_roles_to_magazine");
-		// HashMap<String, Object> magazineRolesMap =
-		// Utils.mapListToDto(rolesToMagazineFormSubmission);
+		List<FormSubmissionDto> rolesFormSubmission = (List<FormSubmissionDto>) execution
+				.getVariable("asign_roles_to_magazine");
+		HashMap<String, Object> rolesMap = Utils.mapListToDto(rolesFormSubmission);
 
 		Account account = accountRepository.findByUsername(Utils.getCurrentUserLogin().get());
 
+		List<Account> fieldEditors = new ArrayList<>();
+		try {
+			Arrays.asList(((String) rolesMap.get("recezenti")).split(",")).forEach(x -> {
+				Account acc = accountRepository.findByUsername(x);
+				if (acc != null) {
+					fieldEditors.add(acc);
+				}
+			});
+		} catch (Exception e) {
+			log.error("failed to get recezenti");
+		}
+		List<Account> reviewers = new ArrayList<>();
+		try {
+			Arrays.asList(((String) rolesMap.get("urednici")).split(",")).forEach(x -> {
+				Account acc = accountRepository.findByUsername(x);
+				if (acc != null) {
+					reviewers.add(acc);
+				}
+			});
+		} catch (Exception e) {
+			log.error("failed to get urednici");
+		}
+
 		ScientificCommittee scientificCommittee = new ScientificCommittee();
 		scientificCommittee.setChiefEditor(account);
-		// scientificCommittee.setFieldEditors(fieldEditors);
+		scientificCommittee.setFieldEditors(fieldEditors);
 		scientificCommittee = scientificCommitteeRepository.save(scientificCommittee);
 
 		Magazine magazine = new Magazine();
@@ -85,6 +105,7 @@ public class CreateNewMagazineService implements JavaDelegate {
 		magazine.setScienceFieldList(Arrays.asList(((String) newMagazineMap.get("naucne_oblasti")).split(",")).stream()
 				.map(ScienceField::valueOf).collect(Collectors.toList()));
 		magazine.setScientificCommittee(scientificCommittee);
+		magazine.setReviewers(reviewers);
 		magazine = magazineRepository.save(magazine);
 
 		log.info("magazine save success, id: {}", magazine.getId());

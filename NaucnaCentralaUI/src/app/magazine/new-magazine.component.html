@@ -1,60 +1,60 @@
 <div>
-  <form #f="ngForm" (ngSubmit)="onSubmit(f.value, f)" ngNativeValidate>
-    <div *ngFor="let field of formFields">
-      <label for="{{ field.id }}">{{ field.label }}</label>
+    <form
+        #f="ngForm"
+        (ngSubmit)="onSubmit(f.value, f)"
+        ngNativeValidate
+    >
+        <div *ngFor="let field of formFields">
+            <label for="{{ field.id }}">{{ field.label }}</label>
 
-      <input
-        type="password"
-        name="{{ field.id }}"
-        ngModel
-        *ngIf="field.type.name == 'string' && field.id == 'password'"
-      />
-      <input
-        type="text"
-        name="{{ field.id }}"
-        ngModel
-        *ngIf="field.type.name == 'string' && field.id != 'password'"
-      />
-      <input
-        type="checkbox"
-        name="{{ field.id }}"
-        ngModel
-        *ngIf="field.type.name == 'boolean'"
-      />
-      <input
-        type="number"
-        name="{{ field.id }}"
-        ngModel
-        *ngIf="field.type.name == 'long'"
-      />
-      <select
-        multiple
-        ngModel
-        name="{{ field.id }}"
-        *ngIf="field.type.name == 'enum' && field.id == 'naucne_oblasti'"
-      >
-        <option *ngFor="let val of enumValues[field.id]" value="{{ val }}">
-          {{ field.type.values[val] }}
-        </option>
-      </select>
+            <input
+                type="password"
+                name="{{ field.id }}"
+                ngModel
+                *ngIf="field.type.name == 'string' && field.id == 'password'"
+            >
+            <input
+                type="text"
+                name="{{ field.id }}"
+                ngModel
+                *ngIf="field.type.name == 'string' && field.id != 'password'"
+            >
+            <input
+                type="checkbox"
+                name="{{ field.id }}"
+                ngModel
+                *ngIf="field.type.name == 'boolean'"
+            >
+            <input
+                type="number"
+                name="{{ field.id }}"
+                ngModel
+                *ngIf="field.type.name == 'long'"
+            >
+            <select
+                [multiple]="['naucne_oblasti', 'urednici', 'recezenti'].indexOf(field.id) >=0"
+                ngModel
+                name="{{ field.id }}"
+                *ngIf="field.type.name == 'enum'"
+            >
+                <option
+                    *ngFor="let val of enumValues[field.id]"
+                    value="{{ val }}"
+                >
+                    {{ field.type.values[val] }}
+                </option>
+            </select>
+        </div>
 
-      <select
-        ngModel
-        name="{{ field.id }}"
-        *ngIf="field.type.name == 'enum' && field.id != 'naucne_oblasti'"
-      >
-        <option *ngFor="let val of enumValues[field.id]" value="{{ val }}">
-          {{ field.type.values[val] }}
-        </option>
-      </select>
-    </div>
+        <input
+            type="submit"
+            value="Submit"
+        >
+    </form>
 
-    <input type="submit" value="Submit" />
-  </form>
+    <!-- <button (click)="getTasks()">Get tasks</button> -->
 
-  <!-- <button (click)="getTasks()">Get tasks</button> -->
-
-  <!-- <table>
+    <!-- <table>
   <tr *ngFor="let task of tasks" > <td>{{task.name}}</td><td>{{task.assignee}}</td><td><button (click)="claim(task.taskId)">Claim</button></td> <td><button (click)="complete(task.taskId)">Complete</button></td></tr>
 
 </table> -->

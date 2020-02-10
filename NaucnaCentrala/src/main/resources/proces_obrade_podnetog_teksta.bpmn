@@ -10,17 +10,9 @@
         <camunda:formData>
           <camunda:formField id="casopis" label="Časopis" type="enum">
             <camunda:value id="open_access" name="Open access" />
-            <camunda:value id="no_open_access" name="Not open access" />
+            <camunda:value id="not_open_access" name="Not open access" />
           </camunda:formField>
         </camunda:formData>
-        <camunda:taskListener event="complete">
-          <camunda:script scriptFormat="Groovy">task.getExecution().setVariable("casopis_glavni_urednik", "urednik")
-task.getExecution().setVariable("casopis_urednik_naucne_oblasti", "urednik")
-
-recezenti = task.getExecution().getProcessEngineServices().getIdentityService().createUserQuery().memberOfGroup("recezent").list()
-
-task.getExecution().setVariable("casopis_recezenti", recezenti)</camunda:script>
-        </camunda:taskListener>
       </bpmn:extensionElements>
       <bpmn:incoming>SequenceFlow_06xtwua</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1o8xwec</bpmn:outgoing>
@@ -46,9 +38,19 @@ task.getExecution().setVariable("casopis_recezenti", recezenti)</camunda:script>
         <bpmn:outgoing>SequenceFlow_07pqg7i</bpmn:outgoing>
       </bpmn:startEvent>
       <bpmn:endEvent id="EndEvent_027sleq">
-        <bpmn:incoming>SequenceFlow_07pqg7i</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow_1h938bi</bpmn:incoming>
       </bpmn:endEvent>
-      <bpmn:sequenceFlow id="SequenceFlow_07pqg7i" sourceRef="StartEvent_17dbac4" targetRef="EndEvent_027sleq" />
+      <bpmn:sequenceFlow id="SequenceFlow_07pqg7i" sourceRef="StartEvent_17dbac4" targetRef="Task_1r6qyhw" />
+      <bpmn:sequenceFlow id="SequenceFlow_1h938bi" sourceRef="Task_1r6qyhw" targetRef="EndEvent_027sleq" />
+      <bpmn:userTask id="Task_1r6qyhw" name="Uplati clanarinu">
+        <bpmn:extensionElements>
+          <camunda:formData>
+            <camunda:formField id="uplati_clanarinu" label="Plati clanarinu" type="boolean" />
+          </camunda:formData>
+        </bpmn:extensionElements>
+        <bpmn:incoming>SequenceFlow_07pqg7i</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_1h938bi</bpmn:outgoing>
+      </bpmn:userTask>
     </bpmn:subProcess>
     <bpmn:exclusiveGateway id="ExclusiveGateway_0jphy2h">
       <bpmn:incoming>SequenceFlow_11894ct</bpmn:incoming>
@@ -63,12 +65,7 @@ task.getExecution().setVariable("casopis_recezenti", recezenti)</camunda:script>
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${autor_platio_clanarinu}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="SequenceFlow_0w7rpiy" sourceRef="Task_0fhqx14" targetRef="ExclusiveGateway_1uljgwf" />
-    <bpmn:serviceTask id="Task_0fhqx14" name="Provjera autorove članarine" camunda:expression="#{true}">
-      <bpmn:extensionElements>
-        <camunda:executionListener event="end">
-          <camunda:script scriptFormat="Groovy">execution.setVariable("autor_platio_clanarinu", true);</camunda:script>
-        </camunda:executionListener>
-      </bpmn:extensionElements>
+    <bpmn:serviceTask id="Task_0fhqx14" name="Provjera autorove članarine" camunda:class="naucnaCentrala.NaucnaCentrala.service.camunda.CheckAuthorsMambershipService">
       <bpmn:incoming>SequenceFlow_0renwfh</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0w7rpiy</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -78,10 +75,13 @@ task.getExecution().setVariable("casopis_recezenti", recezenti)</camunda:script>
       <bpmn:extensionElements>
         <camunda:formData>
           <camunda:formField id="naziv" label="Naziv" type="string" />
-          <camunda:formField id="apstrakt" label="Apstrakt" type="string" />
+          <camunda:formField id="koautori" label="Koautori" type="string" />
           <camunda:formField id="kljucne_rijeci" label="Kljucne riječi" type="string" />
+          <camunda:formField id="apstrakt" label="Apstrakt" type="string" />
+          <camunda:formField id="naucna_oblast" label="Naucn oblast" type="enum" />
           <camunda:formField id="rad" label="Rad" type="string" />
         </camunda:formData>
+        <camunda:taskListener class="naucnaCentrala.NaucnaCentrala.handlers.LoadScienceFields" event="create" />
       </bpmn:extensionElements>
       <bpmn:incoming>SequenceFlow_08qvsix</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_03lyvxy</bpmn:outgoing>
@@ -91,31 +91,22 @@ task.getExecution().setVariable("casopis_recezenti", recezenti)</camunda:script>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="SequenceFlow_03lyvxy" sourceRef="Task_1c45jje" targetRef="Task_1qw5jdo" />
     <bpmn:sequenceFlow id="SequenceFlow_1wxltsq" sourceRef="Task_1qw5jdo" targetRef="Task_1bybkug" />
-    <bpmn:serviceTask id="Task_1bybkug" name="Slanje notifikacije autoru i glavnom uredniku" camunda:expression="#{true}">
+    <bpmn:serviceTask id="Task_1bybkug" name="Slanje notifikacije autoru i glavnom uredniku" camunda:class="naucnaCentrala.NaucnaCentrala.service.camunda.SendPaperSubmitedNotificationEmailService">
       <bpmn:incoming>SequenceFlow_1wxltsq</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0t4r5n1</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="SequenceFlow_0t4r5n1" sourceRef="Task_1bybkug" targetRef="Task_1io5knu" />
-    <bpmn:userTask id="Task_1io5knu" name="Obrada radova za časopis" camunda:assignee="${glavni_urednik}">
+    <bpmn:userTask id="Task_1io5knu" name="Obrada radova za časopis" camunda:assignee="${glavni_urednik_login}">
       <bpmn:extensionElements>
         <camunda:formData>
-          <camunda:formField id="naziv" label="Naziv" type="string" defaultValue="#{naziv}">
-            <camunda:validation>
-              <camunda:constraint name="readonly" />
-            </camunda:validation>
-          </camunda:formField>
-          <camunda:formField id="apstrakt" label="Apstrakt" type="string" defaultValue="#{apstrakt}">
-            <camunda:validation>
-              <camunda:constraint name="readonly" />
-            </camunda:validation>
-          </camunda:formField>
-          <camunda:formField id="kljucne_rijeci" label="Kljucne rijeci" type="string" defaultValue="#{kljucne_rijeci}">
-            <camunda:validation>
-              <camunda:constraint name="readonly" />
-            </camunda:validation>
-          </camunda:formField>
           <camunda:formField id="rad_relevantan" label="Rad relevantan?" type="boolean" />
+          <camunda:formField id="podaci" type="string" defaultValue="${check_data}">
+            <camunda:validation>
+              <camunda:constraint name="readonly" />
+            </camunda:validation>
+          </camunda:formField>
         </camunda:formData>
+        <camunda:taskListener class="naucnaCentrala.NaucnaCentrala.handlers.PrepareDataForChiefEditor" event="create" />
       </bpmn:extensionElements>
       <bpmn:incoming>SequenceFlow_0t4r5n1</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0us6zdt</bpmn:outgoing>
@@ -129,7 +120,7 @@ task.getExecution().setVariable("casopis_recezenti", recezenti)</camunda:script>
     <bpmn:sequenceFlow id="SequenceFlow_0w6ezip" name="Da" sourceRef="ExclusiveGateway_039nqhi" targetRef="Task_1pq4aw3">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">#{rad_relevantan}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:userTask id="Task_1pq4aw3" name="Pregled pdf dokumenta" camunda:assignee="${glavni_urednik}">
+    <bpmn:userTask id="Task_1pq4aw3" name="Pregled pdf dokumenta" camunda:assignee="${glavni_urednik_login}">
       <bpmn:extensionElements>
         <camunda:formData>
           <camunda:formField id="rad" label="Rad" type="string" defaultValue="#{rad}">
@@ -148,7 +139,7 @@ task.getExecution().setVariable("casopis_recezenti", recezenti)</camunda:script>
     <bpmn:sequenceFlow id="SequenceFlow_0aif3oz" name="Ne" sourceRef="ExclusiveGateway_039nqhi" targetRef="Task_0aoprsi">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">#{not rad_relevantan}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:serviceTask id="Task_0aoprsi" name="Slanje obavjestenaj autoru da rad nije tematski prikladan" camunda:expression="#{true}">
+    <bpmn:serviceTask id="Task_0aoprsi" name="Slanje obavjestenaj autoru da rad nije tematski prikladan" camunda:expression="naucnaCentrala.NaucnaCentrala.service.camunda.SendPaperDeclinedNotificationEmailService">
       <bpmn:incoming>SequenceFlow_0aif3oz</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_00rmqdj</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -165,7 +156,7 @@ task.getExecution().setVariable("casopis_recezenti", recezenti)</camunda:script>
     <bpmn:sequenceFlow id="SequenceFlow_1qkuggg" name="Ne" sourceRef="ExclusiveGateway_1hcpdtp" targetRef="Task_03j253s">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">#{not dobro_formatiran}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:serviceTask id="Task_03j253s" name="Slanje mejl notifikacije za korigovanje" camunda:expression="#{true}">
+    <bpmn:serviceTask id="Task_03j253s" name="Slanje mejl notifikacije za korigovanje" camunda:class="naucnaCentrala.NaucnaCentrala.service.camunda.SendEditSubmissionNotificationEmailService">
       <bpmn:incoming>SequenceFlow_1qkuggg</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_09lq0e0</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -195,7 +186,7 @@ task.getExecution().setVariable("casopis_recezenti", recezenti)</camunda:script>
       </bpmn:timerEventDefinition>
     </bpmn:boundaryEvent>
     <bpmn:sequenceFlow id="SequenceFlow_0sp7lfs" sourceRef="IntermediateThrowEvent_1u55w11" targetRef="Task_01r1ale" />
-    <bpmn:serviceTask id="Task_01r1ale" name="Obavještenje autoru: rad odbijen iz tehničkih razloga" camunda:expression="#{true}">
+    <bpmn:serviceTask id="Task_01r1ale" name="Obavještenje autoru: rad odbijen iz tehničkih razloga" camunda:class="naucnaCentrala.NaucnaCentrala.service.camunda.SendPaperDeclinedNotificationEmailService">
       <bpmn:incoming>SequenceFlow_0sp7lfs</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0cdhr8t</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -203,37 +194,20 @@ task.getExecution().setVariable("casopis_recezenti", recezenti)</camunda:script>
       <bpmn:incoming>SequenceFlow_0cdhr8t</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="SequenceFlow_0cdhr8t" sourceRef="Task_01r1ale" targetRef="EndEvent_0o2fk4y" />
-    <bpmn:sequenceFlow id="SequenceFlow_0knv4qg" name="Da" sourceRef="ExclusiveGateway_1hcpdtp" targetRef="Task_0yjmjpr">
+    <bpmn:sequenceFlow id="SequenceFlow_0knv4qg" name="Da" sourceRef="ExclusiveGateway_1hcpdtp" targetRef="Task_0bbowmq">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">#{dobro_formatiran}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:serviceTask id="Task_1qw5jdo" name="Odabir glavnog urednika" camunda:expression="#{true}">
-      <bpmn:extensionElements>
-        <camunda:executionListener event="end">
-          <camunda:script scriptFormat="Groovy">glavniUrednik = execution.getVariable("casopis_glavni_urednik")
-execution.setVariable("glavni_urednik", glavniUrednik);</camunda:script>
-        </camunda:executionListener>
-      </bpmn:extensionElements>
+    <bpmn:serviceTask id="Task_1qw5jdo" name="Odabir glavnog urednika" camunda:class="naucnaCentrala.NaucnaCentrala.service.camunda.SelectChiefEditorService">
       <bpmn:incoming>SequenceFlow_03lyvxy</bpmn:incoming>
       <bpmn:incoming>SequenceFlow_0s6ybcx</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1wxltsq</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="Task_0bbowmq" name="Odabir urednika" camunda:expression="#{true}">
-      <bpmn:extensionElements>
-        <camunda:executionListener event="end">
-          <camunda:script scriptFormat="Groovy">// sistem automatski bira: odabrani_urednik
-// ako nema - postavi glavnog_urednika
-odabraniUrednik = execution.getVariable("casopis_urednik_naucne_oblasti");
-if (odabraniUrednik == null) {
-  odabraniUrednik = execution.getVariable("glavni_urednik");
-}
-execution.setVariable("odabrani_urednik", odabraniUrednik);</camunda:script>
-        </camunda:executionListener>
-      </bpmn:extensionElements>
-      <bpmn:incoming>SequenceFlow_14js03m</bpmn:incoming>
+    <bpmn:serviceTask id="Task_0bbowmq" name="Odabir urednika" camunda:class="naucnaCentrala.NaucnaCentrala.service.camunda.SelectScienceFieldEditorService">
+      <bpmn:incoming>SequenceFlow_0knv4qg</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1hvsnhn</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="SequenceFlow_1hvsnhn" sourceRef="Task_0bbowmq" targetRef="Task_1eipm9v" />
-    <bpmn:serviceTask id="Task_1eipm9v" name="Slanje notifikacije uredniku o novom radu" camunda:expression="#{true}">
+    <bpmn:serviceTask id="Task_1eipm9v" name="Slanje notifikacije uredniku o novom radu" camunda:class="naucnaCentrala.NaucnaCentrala.service.camunda.SendEditorNotificationEmailService">
       <bpmn:incoming>SequenceFlow_1hvsnhn</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_19aiqg2</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -243,45 +217,8 @@ execution.setVariable("odabrani_urednik", odabraniUrednik);</camunda:script>
           <camunda:formField id="recezent" label="Odabir recezenta" type="enum" />
           <camunda:formField id="zavrsi_odabir" label="Zavrsi odabir" type="boolean" />
         </camunda:formData>
-        <camunda:taskListener event="complete">
-          <camunda:script scriptFormat="Groovy">taskFormData = task.getExecution().getProcessEngineServices().getFormService().getTaskFormData(task.getId());
-
-listaRecezenata = task.getExecution().getVariable("listaRecezenata")
-if (listaRecezenata==null)
-    listaRecezenata = new java.util.ArrayList();
-
-formFields = taskFormData.getFormFields();
-if(formFields!=null){
-   for(field in formFields){
-       if(field.getId() == "recezent"){
-           if(field.getValue()!="none")
-                listaRecezenata.add(field.getValue());
-       }
-   }
-}
-
-task.getExecution().setVariable("listaRecezenata", listaRecezenata);
-
-atLeastTwo = listaRecezenata.size() &gt;= 2
-task.getExecution().setVariable("atLeastTwo", atLeastTwo);</camunda:script>
-        </camunda:taskListener>
-        <camunda:taskListener event="create">
-          <camunda:script scriptFormat="Groovy">taskFormData = task.getExecution().getProcessEngineServices().getFormService().getTaskFormData(task.getId());
-accountants = task.getExecution().getVariable("casopis_recezenti");
-
-formFields = taskFormData.getFormFields();
-if(formFields!=null){
-   for(field in formFields){
-       if( field.getId() == "recezent" ){
-           //ovo je nase select polje
-           items = field.getType().getValues();
-           for(user in accountants){
-               items.put(user.getId(),user.getFirstName()+" "+user.getLastName());
-           }
-       }
-   }
-}</camunda:script>
-        </camunda:taskListener>
+        <camunda:taskListener class="naucnaCentrala.NaucnaCentrala.handlers.ReviewerSelectComplete" event="complete" />
+        <camunda:taskListener class="naucnaCentrala.NaucnaCentrala.handlers.ReviewerSelectCreate" event="create" />
       </bpmn:extensionElements>
       <bpmn:incoming>SequenceFlow_0vsw4y5</bpmn:incoming>
       <bpmn:incoming>SequenceFlow_1qls3ud</bpmn:incoming>
@@ -606,12 +543,6 @@ if(formFields!=null){
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="SequenceFlow_19esufd" sourceRef="BoundaryEvent_1jlf13s" targetRef="EndEvent_0eazm5a" />
     <bpmn:sequenceFlow id="SequenceFlow_19aiqg2" sourceRef="Task_1eipm9v" targetRef="ExclusiveGateway_1pc70kg" />
-    <bpmn:sequenceFlow id="SequenceFlow_14js03m" sourceRef="Task_0yjmjpr" targetRef="Task_0bbowmq" />
-    <bpmn:scriptTask id="Task_0yjmjpr" name="Postavi podrazumijevane vrijednosti" scriptFormat="Groovy">
-      <bpmn:incoming>SequenceFlow_0knv4qg</bpmn:incoming>
-      <bpmn:outgoing>SequenceFlow_14js03m</bpmn:outgoing>
-      <bpmn:script>execution.setVariable("odgovor_na_komentare", "");</bpmn:script>
-    </bpmn:scriptTask>
     <bpmn:exclusiveGateway id="ExclusiveGateway_1pc70kg" name="casopis ima recezente">
       <bpmn:incoming>SequenceFlow_19aiqg2</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1qls3ud</bpmn:outgoing>
@@ -623,18 +554,11 @@ if(formFields!=null){
     <bpmn:sequenceFlow id="SequenceFlow_07ugdan" name="Ne" sourceRef="ExclusiveGateway_1pc70kg" targetRef="Task_13e6i8n">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">#{casopis_recezenti.size() &lt;= 0}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:scriptTask id="Task_13e6i8n" name="Postavi glavnog urednika u listu recezenata" scriptFormat="Groovy">
+    <bpmn:sequenceFlow id="SequenceFlow_133vgsg" sourceRef="Task_13e6i8n" targetRef="UserTask_16xqsuz" />
+    <bpmn:serviceTask id="Task_13e6i8n" name="Postavi glavnog urednika u listu recezenata" camunda:class="naucnaCentrala.NaucnaCentrala.service.camunda.AddChiefEditorToReviewerListService">
       <bpmn:incoming>SequenceFlow_07ugdan</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_133vgsg</bpmn:outgoing>
-      <bpmn:script>listaRecezenata = new java.util.ArrayList();
-
-glavniUrednik = execution.getVariable("casopis_glavni_urednik");
-
-listaRecezenata.add(glavniUrednik);
-
-execution.setVariable("listaRecezenata", listaRecezenata);</bpmn:script>
-    </bpmn:scriptTask>
-    <bpmn:sequenceFlow id="SequenceFlow_133vgsg" sourceRef="Task_13e6i8n" targetRef="UserTask_16xqsuz" />
+    </bpmn:serviceTask>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="proces_obrade_podnetog_teksta">
@@ -682,7 +606,9 @@ execution.setVariable("listaRecezenata", listaRecezenata);</bpmn:script>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_07pqg7i_di" bpmnElement="SequenceFlow_07pqg7i">
         <di:waypoint x="916" y="470" />
-        <di:waypoint x="1112" y="472" />
+        <di:waypoint x="938" y="470" />
+        <di:waypoint x="938" y="470" />
+        <di:waypoint x="960" y="472" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="ExclusiveGateway_0jphy2h_di" bpmnElement="ExclusiveGateway_0jphy2h" isMarkerVisible="true">
         <dc:Bounds x="705" y="265" width="50" height="50" />
@@ -838,19 +764,19 @@ execution.setVariable("listaRecezenata", listaRecezenata);</bpmn:script>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_0knv4qg_di" bpmnElement="SequenceFlow_0knv4qg">
         <di:waypoint x="1590" y="315" />
-        <di:waypoint x="1590" y="350" />
+        <di:waypoint x="1590" y="410" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1598" y="315" width="15" height="14" />
+          <dc:Bounds x="1598" y="322" width="15" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="ServiceTask_1jivlue_di" bpmnElement="Task_1qw5jdo">
         <dc:Bounds x="830" y="140" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="ServiceTask_0astkze_di" bpmnElement="Task_0bbowmq">
-        <dc:Bounds x="1540" y="470" width="100" height="80" />
+        <dc:Bounds x="1540" y="410" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_1hvsnhn_di" bpmnElement="SequenceFlow_1hvsnhn">
-        <di:waypoint x="1590" y="550" />
+        <di:waypoint x="1590" y="490" />
         <di:waypoint x="1590" y="600" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="ServiceTask_0i186n9_di" bpmnElement="Task_1eipm9v">
@@ -1050,13 +976,6 @@ execution.setVariable("listaRecezenata", listaRecezenata);</bpmn:script>
         <di:waypoint x="1640" y="640" />
         <di:waypoint x="1710" y="640" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="SequenceFlow_14js03m_di" bpmnElement="SequenceFlow_14js03m">
-        <di:waypoint x="1590" y="430" />
-        <di:waypoint x="1590" y="470" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="ScriptTask_1i0meo7_di" bpmnElement="Task_0yjmjpr">
-        <dc:Bounds x="1540" y="350" width="100" height="80" />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="ExclusiveGateway_1pc70kg_di" bpmnElement="ExclusiveGateway_1pc70kg" isMarkerVisible="true">
         <dc:Bounds x="1710" y="615" width="50" height="50" />
         <bpmndi:BPMNLabel>
@@ -1079,15 +998,22 @@ execution.setVariable("listaRecezenata", listaRecezenata);</bpmn:script>
           <dc:Bounds x="1743" y="710" width="15" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="ScriptTask_1x86qrb_di" bpmnElement="Task_13e6i8n">
-        <dc:Bounds x="1870" y="720" width="100" height="80" />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_133vgsg_di" bpmnElement="SequenceFlow_133vgsg">
         <di:waypoint x="1970" y="760" />
         <di:waypoint x="2100" y="760" />
         <di:waypoint x="2100" y="530" />
         <di:waypoint x="2150" y="530" />
       </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1h938bi_di" bpmnElement="SequenceFlow_1h938bi">
+        <di:waypoint x="1060" y="472" />
+        <di:waypoint x="1112" y="472" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="UserTask_1rdtv8k_di" bpmnElement="Task_1r6qyhw">
+        <dc:Bounds x="960" y="432" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_179e1j2_di" bpmnElement="Task_13e6i8n">
+        <dc:Bounds x="1870" y="720" width="100" height="80" />
+      </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>

@@ -31,11 +31,11 @@
     <bpmn:userTask id="Task_0wcas1e" name="Dodjela rola" camunda:assignee="${urednik}">
       <bpmn:extensionElements>
         <camunda:formData>
-          <camunda:formField id="urednik1" label="Prvi urednik" type="string" />
-          <camunda:formField id="urednik2" label="Drugi urednik" type="string" />
-          <camunda:formField id="recezent1" label="Prvi recezent" type="string" />
-          <camunda:formField id="recezent2" label="Drugi recezent" type="string" />
+          <camunda:formField id="urednici" label="Urednici" type="enum" />
+          <camunda:formField id="recezenti" label="Recezenti" type="enum" />
         </camunda:formData>
+        <camunda:taskListener class="naucnaCentrala.NaucnaCentrala.handlers.LoadEditorsFields" event="create" />
+        <camunda:taskListener class="naucnaCentrala.NaucnaCentrala.handlers.LoadReviewersFields" event="create" />
       </bpmn:extensionElements>
       <bpmn:incoming>SequenceFlow_1nswa2u</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1jiou9l</bpmn:outgoing>

@@ -1,16 +1,15 @@
 import { MagazineService } from "./../services/magazine/magazine.service";
 import { Component, OnInit } from "@angular/core";
-import { UserService } from "../services/user/user.service";
-import { Router } from "@angular/router";
+import { Router, ActivatedRoute } from "@angular/router";
 
 // import { JwtHelperService } from '@auth0/angular-jwt';
 
 @Component({
-  selector: "app-new-magazine",
-  templateUrl: "./new-magazine.component.html",
-  styleUrls: ["./magazine.component.css"]
+  selector: "app-submit-paper",
+  templateUrl: "./submit-paper.component.html",
+  styleUrls: ["./paper.component.css"]
 })
-export class NewMagazineComponent implements OnInit {
+export class SubmitPaperComponent implements OnInit {
   private repeated_password = "";
   private categories = [];
   private formFieldsDto = null;
@@ -20,6 +19,8 @@ export class NewMagazineComponent implements OnInit {
   private enumValues = [];
   private tasks = [];
   private createNewMagazineState = true;
+  payMembershipProcess = false;
+  magazineId;
 
   // private user = {
   //   username: "",
@@ -30,9 +31,14 @@ export class NewMagazineComponent implements OnInit {
 
   constructor(
     private magazineService: MagazineService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {
-    let x = this.magazineService.startProcess("create-new");
+    this.magazineId = this.route.snapshot.params["magazineId"];
+    let x = this.magazineService.selectMagazineForSubmitPaper(
+      this.magazineId,
+      this.magazineService.taskId
+    );
     x.subscribe(
       res => {
         console.log(res);
@@ -43,6 +49,9 @@ export class NewMagazineComponent implements OnInit {
         this.formFields.forEach(field => {
           if (field.type.name == "enum") {
             this.enumValues[field.id] = Object.keys(field.type.values);
+          }
+          if (field.id == "uplati_clanarinu") {
+            this.payMembershipProcess = true;
           }
         });
       },
@@ -68,16 +77,18 @@ export class NewMagazineComponent implements OnInit {
     }
 
     console.log(o);
-    if (this.createNewMagazineState) {
-      this.createNewMagazine(o);
-      this.createNewMagazineState = false;
+    console.log(this.payMembershipProcess);
+    if (this.payMembershipProcess) {
+      this.payMembership(o);
+      this.payMembershipProcess = false;
     } else {
-      this.asignRolesToMagazine(o);
+      this.submitPaper(o);
     }
   }
 
-  asignRolesToMagazine(o) {
-    let x = this.magazineService.asignRolesToMagazine(
+  submitPaper(o) {
+    let x = this.magazineService.submitPaper(
+      this.magazineId,
       o,
       this.formFieldsDto.taskId
     );
@@ -86,7 +97,7 @@ export class NewMagazineComponent implements OnInit {
       res => {
         console.log(res);
 
-        alert("asign roles to magazine successfull!");
+        alert("Submit paper successfull!");
 
         this.router.navigate(["/"]);
       },
@@ -97,9 +108,9 @@ export class NewMagazineComponent implements OnInit {
     );
   }
 
-  createNewMagazine(o) {
-    let x = this.magazineService.createNewMagazine(
-      o,
+  payMembership(o) {
+    let x = this.magazineService.payMembership(
+      this.magazineId,
       this.formFieldsDto.taskId
     );
 
@@ -107,7 +118,7 @@ export class NewMagazineComponent implements OnInit {
       res => {
         // console.log(res);
 
-        alert("Magazine created!");
+        alert("Membership payed!");
 
         // this.router.navigate(["/"]);
         console.log(res);

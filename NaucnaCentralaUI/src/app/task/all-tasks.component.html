@@ -1,5 +1,5 @@
 <div>
-    <a
+    <!-- <a
         *ngIf="isReviewer()"
         class="navbar-brand"
         [routerLink]="['/magazine/new']"
@@ -14,7 +14,7 @@
         [routerLink]
     >
         Submit work to magazine
-    </a>
+    </a> -->
     <hr>
 
     <!-- <div *ngFor="let field of formFields">
@@ -82,22 +82,24 @@
         <table>
             <thead>
                 <th>Id</th>
-                <th>Title</th>
+                <th>Name</th>
+                <th>Assignee</th>
+                <!-- <th>Title</th>
                 <th>ISSN</th>
                 <th>Billing type</th>
-                <th>Science fields</th>
+                <th>Science fields</th> -->
             </thead>
             <tbody>
-                <tr *ngFor="let magazine of allMagazines">
-                    <td>{{magazine.id}}</td>
-                    <td>{{magazine.title}}</td>
-                    <td>{{magazine.issn}}</td>
-                    <td>{{magazine.billingType}}</td>
+                <tr *ngFor="let task of allTasks">
+                    <td>{{task.taskId}}</td>
+                    <td>{{task.name}}</td>
+                    <td>{{task.assignee}}</td>
+                    <!-- <td>{{task.title}}</td>
+                    <td>{{task.issn}}</td>
+                    <td>{{task.billingType}}</td>
+                    <td>{{task.scienceFieldList.join(", ")}}</td> -->
                     <td>
-                        {{magazine.scienceFieldList.join(", ")}}
-                    </td>
-                    <td *ngIf="isAuthor() && selectMagazineForPaper">
-                        <button (click)="publishPaper(magazine.id)">Publish paper</button>
+                        <button (click)="startTask(task.taskId)">Start task</button>
                     </td>
                 </tr>
 

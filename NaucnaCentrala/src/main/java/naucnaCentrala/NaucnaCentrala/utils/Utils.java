@@ -14,7 +14,11 @@ public class Utils {
     public static HashMap<String, Object> mapListToDto(List<FormSubmissionDto> list) {
         HashMap<String, Object> map = new HashMap<String, Object>();
         for (FormSubmissionDto temp : list) {
-            map.put(temp.getFieldId(), temp.getFieldValue().toString());
+            try {
+                map.put(temp.getFieldId(), temp.getFieldValue().toString());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         return map;

@@ -9,7 +9,9 @@ import naucnaCentrala.NaucnaCentrala.model.Authority;
 import naucnaCentrala.NaucnaCentrala.repository.AccountRepository;
 import naucnaCentrala.NaucnaCentrala.service.AccountService;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import naucnaCentrala.NaucnaCentrala.repository.AuthorityRepository;
@@ -41,6 +43,20 @@ public class AccountServiceImpl implements AccountService {
     public Account findById(Long id) {
         log.info("findByUsername, id: {}", id);
         return this.accountRepository.getOne(id);
+    }
+
+    @Override
+    public List<Account> getAllReviewers() {
+        Set<Authority> authorities = new HashSet<>();
+        authorities.add(new Authority("REVIEWER"));
+        return this.accountRepository.findAllByAuthoritiesIn(authorities);
+    }
+
+    @Override
+    public List<Account> getAllEditors() {
+        Set<Authority> authorities = new HashSet<>();
+        authorities.add(new Authority("EDITOR"));
+        return this.accountRepository.findAllByAuthoritiesIn(authorities);
     }
 
     /**

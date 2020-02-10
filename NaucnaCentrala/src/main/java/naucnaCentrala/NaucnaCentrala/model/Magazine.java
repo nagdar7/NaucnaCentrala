@@ -53,4 +53,8 @@ public class Magazine {
 
     @OneToMany(mappedBy = "reviewingMagazines", fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
     private List<Account> reviewers;
+
+    @ManyToMany
+    @JoinTable(name = "open_access_authors", joinColumns = @JoinColumn(name = "magazine_id"), inverseJoinColumns = @JoinColumn(name = "account_id"))
+    private List<Account> openAccessAuthors;
 }

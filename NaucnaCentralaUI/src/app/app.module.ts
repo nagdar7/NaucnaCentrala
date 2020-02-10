@@ -1,3 +1,7 @@
+import { AllTasksComponent } from "./task/all-tasks.component";
+import { TaskComponent } from "./task/task.component";
+import { Editor } from "./guard/editor.guard";
+import { SubmitPaperComponent } from "./paper/submit-paper.component";
 import { AllMagazineComponent } from "./magazine/all-magazine.component";
 import { NewMagazineComponent } from "./magazine/new-magazine.component";
 import { Routing } from "./app.routing";
@@ -29,7 +33,10 @@ import { ErrorInterceptor } from "./helpers/error.interceptor";
     RegistrationComponent,
     LoginComponent,
     NewMagazineComponent,
-    AllMagazineComponent
+    AllMagazineComponent,
+    SubmitPaperComponent,
+    AllTasksComponent,
+    TaskComponent
   ],
   imports: [
     BrowserModule,
@@ -42,6 +49,7 @@ import { ErrorInterceptor } from "./helpers/error.interceptor";
   providers: [
     Reviewer,
     Author,
+    Editor,
     Authorized,
     Notauthorized,
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true }
