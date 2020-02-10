@@ -2,18 +2,17 @@ package naucnaCentrala.NaucnaCentrala.model;
 
 import java.io.Serializable;
 
-public class FormSubmissionDto implements Serializable{
-	
+public class FormSubmissionDto implements Serializable {
+
 	String fieldId;
-	String fieldValue;
-	
-	
+	Object fieldValue;
+
 	public FormSubmissionDto() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
 
-	public FormSubmissionDto(String fieldId, String fieldValue) {
+	public FormSubmissionDto(String fieldId, Object fieldValue) {
 		super();
 		this.fieldId = fieldId;
 		this.fieldValue = fieldValue;
@@ -27,13 +26,12 @@ public class FormSubmissionDto implements Serializable{
 		this.fieldId = fieldId;
 	}
 
-	public String getFieldValue() {
+	public Object getFieldValue() {
 		return fieldValue;
 	}
 
-	public void setFieldValue(String fieldValue) {
+	public void setFieldValue(Object fieldValue) {
 		this.fieldValue = fieldValue;
 	}
-	
-	
+
 }

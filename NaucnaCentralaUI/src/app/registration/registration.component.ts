@@ -1,16 +1,13 @@
-import { Component, OnInit } from '@angular/core';
-import { UserService } from '../services/users/user.service';
-import { RepositoryService } from '../services/repository/repository.service';
-import { RegistrationService } from '../services/registration/registration.service';
-import { Router } from '@angular/router';
+import { Component, OnInit } from "@angular/core";
+import { UserService } from "../services/user/user.service";
+import { Router } from "@angular/router";
 
 @Component({
-  selector: 'app-registration',
-  templateUrl: './registration.component.html',
-  styleUrls: ['./registration.component.css']
+  selector: "app-registration",
+  templateUrl: "./registration.component.html",
+  styleUrls: ["./registration.component.css"]
 })
 export class RegistrationComponent implements OnInit {
-
   private repeated_password = "";
   private categories = [];
   private formFieldsDto = null;
@@ -20,11 +17,8 @@ export class RegistrationComponent implements OnInit {
   private enumValues = [];
   private tasks = [];
 
-  constructor(
-    private registrationService: RegistrationService,
-    private router: Router) {
-
-    let x = registrationService.startProcess();
+  constructor(private userService: UserService, private router: Router) {
+    let x = userService.startProcess("registration");
 
     x.subscribe(
       res => {
@@ -33,43 +27,47 @@ export class RegistrationComponent implements OnInit {
         this.formFieldsDto = res;
         this.formFields = res.formFields;
         this.processInstance = res.processInstanceId;
-        this.formFields.forEach((field) => {
-
-          if (field.type.name == 'enum') {
+        this.formFields.forEach(field => {
+          if (field.type.name == "enum") {
             this.enumValues = Object.keys(field.type.values);
           }
         });
       },
       err => {
-        console.log("Error occured");
+        alert(err.error.message);
+        console.log("Error occured", err);
       }
     );
   }
 
-  ngOnInit() {
-  }
+  ngOnInit() {}
 
   onSubmit(value, form) {
     let o = new Array();
     for (var property in value) {
       console.log(property);
       console.log(value[property]);
-      o.push({ fieldId: property, fieldValue: value[property] });
+      var vvv = value[property];
+      if (!!value[property].join) {
+        vvv = value[property].join(",");
+      }
+      o.push({ fieldId: property, fieldValue: vvv });
     }
 
     console.log(o);
-    let x = this.registrationService.registerUser(o, this.formFieldsDto.taskId);
+    let x = this.userService.registerUser(o, this.formFieldsDto.taskId);
 
     x.subscribe(
       res => {
         console.log(res);
 
-        alert("You registered successfully please check email!")
+        alert("You registered successfully please check email!");
 
-        this.router.navigate(['/']);
+        this.router.navigate(["/"]);
       },
       err => {
-        console.log("Error occured");
+        console.log("Error occured", err);
+        alert(err.error.message);
       }
     );
   }
@@ -114,5 +112,4 @@ export class RegistrationComponent implements OnInit {
   //     }
   //   );
   //  }
-
 }

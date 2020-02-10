@@ -4,12 +4,12 @@ import { CanActivate } from '@angular/router';
 @Injectable()
 export class Authorized implements CanActivate {
 
-  constructor() {}
+  constructor() { }
 
   canActivate() {
-    if(localStorage.user){
+    if (localStorage.getItem('jwt-token')) {
       return true;
-    }else{
+    } else {
       return false;
     }
   }

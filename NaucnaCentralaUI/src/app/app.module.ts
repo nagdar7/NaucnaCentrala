@@ -1,56 +1,52 @@
-import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { RouterModule, Routes } from '@angular/router';
-import { HttpClientModule } from '@angular/common/http';
-import { HttpModule } from '@angular/http';
+import { AllMagazineComponent } from "./magazine/all-magazine.component";
+import { NewMagazineComponent } from "./magazine/new-magazine.component";
+import { Routing } from "./app.routing";
+import { BrowserModule } from "@angular/platform-browser";
+import { NgModule } from "@angular/core";
+import { FormsModule } from "@angular/forms";
+import { RouterModule, Routes } from "@angular/router";
+import { HttpClientModule, HTTP_INTERCEPTORS } from "@angular/common/http";
+import { HttpModule, Http, RequestOptions } from "@angular/http";
 
-import { AppComponent } from './app.component';
+import { AppComponent } from "./app.component";
 
-import { RepositoryService } from './services/repository/repository.service';
-import { UserService } from './services/users/user.service';
+import { RegistrationComponent } from "./registration/registration.component";
 
-import { RegistrationComponent } from './registration/registration.component';
+import { Author } from "./guard/author.guard";
+import { Reviewer } from "./guard/reviewer.guard";
+import { Authorized } from "./guard/authorized.guard";
+import { Notauthorized } from "./guard/notauthorized.guard";
+import { LoginComponent } from "./login/login.component";
+// import { AuthHttp, AuthConfig } from 'angular2-jwt';
 
-import { Authorized } from './guard/authorized.guard';
-import { Admin } from './guard/admin.guard';
-import { Notauthorized } from './guard/notauthorized.guard';
-
-const ChildRoutes =
-  [
-  ]
-
-const RepositoryChildRoutes =
-  [
-
-  ]
-
-const Routes = [
-  {
-    path: "register",
-    component: RegistrationComponent,
-    canActivate: [Notauthorized]
-  }
-]
+import { HOST_URL } from "../config";
+import { JwtInterceptor } from "./helpers/jwt.interceptor";
+import { ErrorInterceptor } from "./helpers/error.interceptor";
 
 @NgModule({
   declarations: [
     AppComponent,
-    RegistrationComponent
+    RegistrationComponent,
+    LoginComponent,
+    NewMagazineComponent,
+    AllMagazineComponent
   ],
   imports: [
     BrowserModule,
     FormsModule,
-    RouterModule.forRoot(Routes),
+    RouterModule.forRoot(Routing),
     HttpClientModule,
     HttpModule
   ],
 
   providers: [
-    Admin,
+    Reviewer,
+    Author,
     Authorized,
-    Notauthorized
+    Notauthorized,
+    { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true }
+    // { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
   ],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {}

@@ -1,5 +1,39 @@
-<nav class="navbar navbar-light bg-light"> 
-  
-  <a class="navbar-brand" [routerLink]="['/register']" >Register</a>  
+<nav class="navbar navbar-light bg-light">
+    <a
+        class="navbar-brand"
+        [routerLink]="['/']"
+    >
+        Home
+    </a>
+    <a
+        *ngIf="!loggedIn()"
+        class="navbar-brand"
+        [routerLink]="['/register']"
+    >
+        Register
+    </a>
+    <a
+        *ngIf="!loggedIn()"
+        class="navbar-brand"
+        [routerLink]="['/login']"
+    >
+        Login
+    </a>
+
+    <a
+        *ngIf="loggedIn()"
+        class="navbar-brand"
+        [routerLink]="['/magazine']"
+    >
+        Magazines
+    </a>
+
+    <a
+        *ngIf="loggedIn()"
+        class="navbar-brand"
+        (click)="logout()"
+    >
+        Logout
+    </a>
 </nav>
 <router-outlet></router-outlet>

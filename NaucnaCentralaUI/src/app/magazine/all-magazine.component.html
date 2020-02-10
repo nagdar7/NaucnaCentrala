@@ -1,0 +1,98 @@
+<div>
+    <a
+        *ngIf="isReviewer()"
+        class="navbar-brand"
+        [routerLink]="['/magazine/new']"
+    >
+        Create new Magazine
+    </a>
+    <hr>
+
+    <!-- <div *ngFor="let field of formFields">
+            <label for="{{ field.id }}">{{ field.label }}</label>
+
+            <input
+                type="password"
+                name="{{ field.id }}"
+                ngModel
+                *ngIf="field.type.name == 'string' && field.id == 'password'"
+            >
+            <input
+                type="text"
+                name="{{ field.id }}"
+                ngModel
+                *ngIf="field.type.name == 'string' && field.id != 'password'"
+            >
+            <input
+                type="checkbox"
+                name="{{ field.id }}"
+                ngModel
+                *ngIf="field.type.name == 'boolean'"
+            >
+            <input
+                type="number"
+                name="{{ field.id }}"
+                ngModel
+                *ngIf="field.type.name == 'long'"
+            >
+            <select
+                multiple
+                ngModel
+                name="{{ field.id }}"
+                *ngIf="field.type.name == 'enum' && field.id == 'naucne_oblasti'"
+            >
+                <option
+                    *ngFor="let val of enumValues[field.id]"
+                    value="{{ val }}"
+                >
+                    {{ field.type.values[val] }}
+                </option>
+            </select>
+
+            <select
+                ngModel
+                name="{{ field.id }}"
+                *ngIf="field.type.name == 'enum' && field.id != 'naucne_oblasti'"
+            >
+                <option
+                    *ngFor="let val of enumValues[field.id]"
+                    value="{{ val }}"
+                >
+                    {{ field.type.values[val] }}
+                </option>
+            </select>
+        </div>
+
+        <input
+            type="submit"
+            value="Submit"
+        > -->
+
+    <!-- <button (click)="getTasks()">Get tasks</button> -->
+    <div style="overflow-x:auto;">
+        <table>
+            <thead>
+                <th>Id</th>
+                <th>Title</th>
+                <th>ISSN</th>
+                <th>Billing type</th>
+                <th>Science fields</th>
+            </thead>
+            <tbody>
+                <tr *ngFor="let magazine of allMagazines">
+                    <td>{{magazine.id}}</td>
+                    <td>{{magazine.title}}</td>
+                    <td>{{magazine.issn}}</td>
+                    <td>{{magazine.billingType}}</td>
+                    <td>
+                        {{magazine.scienceFieldList.join(", ")}}
+                    </td>
+                    <td *ngIf="isAuthor()">
+                        <button (click)="publishPaper(magazine.id)">Publish paper</button>
+                    </td>
+                </tr>
+
+            </tbody>
+        </table>
+    </div>
+</div>
